@@ -71,5 +71,5 @@ foreach ($files as $file) {
     "increment_id" => $laskun_numero
   );
 
-  Edi::create($order);
+  Edi::create($order, "finvoice");
 }

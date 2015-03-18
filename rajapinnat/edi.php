@@ -5,12 +5,14 @@ class Edi {
   /**
    * Luo edi tilauksen
    *
-   * @param array   $order Tilauksen tiedot ja tilauserivit
-   * @return true/false
+   * @param array  $order Tilauksen tiedot ja tilauserivit
+   * @param string $tyyppi
+   *
+   * @return true / false
    */
 
 
-  static function create($order) {
+  static function create($order, $tyyppi = "magento") {
 
     // require 'magento_salasanat.php' muuttujat
     global $magento_api_ht_edi, $ovt_tunnus, $pupesoft_tilaustyyppi;
@@ -257,7 +259,18 @@ class Edi {
 
     $edi_order = iconv("UTF-8", "ISO-8859-1//TRANSLIT", $edi_order);
 
-    $filename = $magento_api_ht_edi."/magento-order-{$order['increment_id']}-".date("Ymd")."-".md5(uniqid(rand(), true)).".txt";
+    if ($tyyppi == "finvoice") {
+      $filename =
+        # @todo Vaihda pathi oikeaksi
+        "/tmp/finvoice-orders/finvoice-order-{$order['increment_id']}-" . date("Ymd") . "-" .
+        md5(uniqid(rand(), true)) . ".txt";
+    }
+    else {
+      $filename =
+        $magento_api_ht_edi . "/magento-order-{$order['increment_id']}-" . date("Ymd") . "-" .
+        md5(uniqid(rand(), true)) . ".txt";
+    }
+
     file_put_contents($filename, $edi_order);
 
     return true;
