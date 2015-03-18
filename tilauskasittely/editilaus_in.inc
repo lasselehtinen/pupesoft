@@ -32,6 +32,11 @@ if ($php_cli) {
     $argv[2] = 'magento';
   }
 
+  if (substr(strtolower(basename($filename)), 0, 14) == "finvoice_order") {
+    $argv[2] = 'magento';
+    $asiakastiedot_kannasta = true;
+  }
+
   // ja toinen parametri komentoriviltä
   $edi_tyyppi  = $argv[2];
 
@@ -1152,7 +1157,7 @@ while ($tietue = fgets($fd)) {
       $maksaja = $apuro['merahti'];
 
       // Verkkokauppatilauksissa luotamme tiedoston laskutustietoihin
-      if ($edi_tyyppi == "magento") {
+      if ($edi_tyyppi == "magento" and !$asiakastiedot_kannasta) {
         $arow["nimi"]       = $lnimi;
         $arow["nimitark"]   = $lnimitark;
         $arow["osoite"]     = $losoite;
