@@ -13,20 +13,29 @@ class Edi {
 
 
   static function create($order, $tyyppi = "magento") {
+    global $pupesoft_tilaustyyppi;
+
+    if (empty($pupesoft_tilaustyyppi)) {
+      exit("Parametrejä puuttuu\n");
+    }
+
     // require 'magento_salasanat.php' muuttujat, jos kyseessä on magento
     if ($tyyppi == "magento") {
-      global $magento_api_ht_edi, $ovt_tunnus, $pupesoft_tilaustyyppi, $verkkokauppa_asiakasnro,
-             $rahtikulu_tuoteno, $rahtikulu_nimitys, $verkkokauppa_erikoiskasittely;
+      global $magento_api_ht_edi, $ovt_tunnus, $verkkokauppa_asiakasnro, $rahtikulu_tuoteno,
+             $rahtikulu_nimitys, $verkkokauppa_erikoiskasittely;
 
-      if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi) or
-          empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)
+      if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($verkkokauppa_asiakasnro) or
+          empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)
       ) {
         exit("Parametrejä puuttuu\n");
       }
+
+      $viitteenne = "";
     }
     else {
       $ovt_tunnus = $order["laskuttajan_ovt"];
       $verkkokauppa_asiakasnro = $order["toim_ovttunnus"];
+      $viitteenne = $order["laskun_numero"];
     }
 
     //Tilauksella käytetyt lahjakortit ei saa vehentää myynti pupen puolella
@@ -46,10 +55,6 @@ class Edi {
     else {
       $grand_total = $order['grand_total'];
     }
-
-    // Miten storen nimi?
-    //$storenimi = (isset($_COOKIE["store_name"])) ? $_COOKIE["store_name"] : "";
-    $storenimi = '';
 
     //tilauksen otsikko
     //return $order->getUpdatedAt();
@@ -97,7 +102,7 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_MAKSETTU:".$order['status']."\n";
     $edi_order .= "OSTOTIL.OT_MAKSUEHTO:".strip_tags($order['payment']['method'])."\n";
     $edi_order .= "OSTOTIL.OT_VIITTEEMME:\n";
-    $edi_order .= "OSTOTIL.OT_VIITTEENNE:$storenimi\n";
+    $edi_order .= "OSTOTIL.OT_VIITTEENNE:{$viitteenne}\n";
     $edi_order .= "OSTOTIL.OT_VEROMAARA:".$order['tax_amount']."\n";
     $edi_order .= "OSTOTIL.OT_SUMMA:".$grand_total."\n";
     $edi_order .= "OSTOTIL.OT_VALUUTTAKOODI:".$order['order_currency_code']."\n";
