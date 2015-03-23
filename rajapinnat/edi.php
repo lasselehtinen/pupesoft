@@ -37,7 +37,7 @@ class Edi {
     }
     else {
       $ovt_tunnus = $order["laskuttajan_ovt"];
-      $verkkokauppa_asiakasnro = $order["toim_ovttunnus"];
+      $verkkokauppa_asiakasnro = $order["asiakasnumero"];
       $viitteenne = $order["laskun_numero"];
       $viitteemme = $order["kommenttiteksti"];
       $yhteyshenkilo = $order["tilausyhteyshenkilo"];
