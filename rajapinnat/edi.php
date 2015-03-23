@@ -32,8 +32,8 @@ class Edi {
 
       $viitteenne = "";
       $viitteemme = "";
-      $yhteyshenkilo =
-        "{$order["billing_address"]["lastname"]} {$order['billing_address']['firstname']}";
+      $yhteyshenkilo = "{$order["billing_address"]["lastname"]} " .
+                       "{$order['billing_address']['firstname']}";
     }
     else {
       $ovt_tunnus = $order["laskuttajan_ovt"];
@@ -88,11 +88,7 @@ class Edi {
     }
     //Yrityksen ovt_tunnus MUISTA MUUTTAA
     $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:".$ovt_tunnus."\n";
-
-    if (!empty($pupesoft_tilaustyyppi)) {
-      $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
-    }
-
+    $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
     $edi_order .= "OSTOTIL.VERKKOKAUPPA:".str_replace("\n", " ", $order['store_name'])."\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:".$order['customer_id']."\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:".str_replace("\n", " ", $order['reference_number'])."\n";
@@ -170,6 +166,8 @@ class Edi {
 
     $i = 1;
     foreach ($order['items'] as $item) {
+      $product_id = $item['product_id'];
+
       if ($item['product_type'] != "configurable") {
 
         // Tuoteno

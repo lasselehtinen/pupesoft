@@ -883,7 +883,6 @@ while ($tietue = fgets($fd)) {
 
     break;
 
-
   case 'ONADPL_PC' :
     // Asiakkaan joku toimitus ovttunnus tms... t‰‰ ylikirjottaa kaiken...
     if ($tieto != "") {
