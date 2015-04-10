@@ -278,7 +278,9 @@ class Edi {
     $edi_order .= "*ME\n";
     $edi_order .= "*IE";
 
-    $edi_order = iconv("UTF-8", "ISO-8859-1//TRANSLIT", $edi_order);
+    if (!PUPE_UNICODE) {
+      $edi_order = iconv("UTF-8", "ISO-8859-1//TRANSLIT", $edi_order);
+    }
 
     if ($tyyppi == "finvoice") {
       $filename =
