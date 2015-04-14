@@ -248,6 +248,7 @@ $sallitaanjt       = "";
 $editilaus_hinta   = "";
 $editilaus_alennus = "";
 $rivikommentti     = "";
+$netto             = "";
 
 // fiilataan parametrejä joita tarvitaan require fileissä
 $tulos_ulos = "edi"; // tää on ftp-send.incissä
@@ -2116,6 +2117,9 @@ while ($tietue = fgets($fd)) {
           // jos tullaan magentosta ja hinta on tiedossa ja kyseessä on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
           if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $editilaus_hinta > 0) {
             $hinta = $editilaus_hinta;
+            if (strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) and $editilaus_hinta > 0) {
+              $netto = 'N';
+            }
           }
           elseif (is_array($hyvityssaanto_hinta_array) and isset($hyvityssaanto_hinta_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno])) {
             $hinta = $hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno];
@@ -2280,6 +2284,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_hinta   = "";
     $editilaus_alennus = "";
     $rivikommentti     = "";
+    $netto             = "";
     break;
 
   case 'OMSG__END' :
