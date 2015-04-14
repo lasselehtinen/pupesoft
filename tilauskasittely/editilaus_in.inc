@@ -1933,46 +1933,42 @@ while ($tietue = fgets($fd)) {
     $edi_nimitys = $type[4]; // rivin neljännessä segmentissä tulee oikee info
     break;
 
+  case 'OSTOTILRIV.OTR_VEROKANTA':
+    // magento-keisissä, tilausrivin veron määrä
+    $verokanta = (int) trim($tieto);
+    break;
+
   case 'OSTOTILRIV.OTR_OSTOHINTA' :
     // Kun tullaan magentosta ja meillä on rahtikulu, niin otetaan hinta talteeen
     // TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
     if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $tieto != '') {
       // Tämä hinta on aina veroton, joten lasketaan vero päälle jos myyntihinnat ovat verollisia
-      $editilaus_hinta = (float) trim(str_replace( ",", ".", $tieto));    
+      $editilaus_hinta = (float) trim(str_replace( ",", ".", $tieto));
+
+      // Käytössä on verolliset myyntihinnat, mutta edifailissa hinnat ovat verottomia
+      if ($yhtiorow["alv_kasittely"] == '' and !isset($verkkokauppa_hinnatedifailistaverollisina)) {
+        $editilaus_hinta = round($editilaus_hinta * (1 + $laskurow["alv"]/100), 2);
+      }
+
+      // Käytössä on verottomat myyntihinnat, mutta edifailissa hinta kuitenkin sisältää verot ja halutaan laskea ne pois
+      if ($yhtiorow["alv_kasittely"] != '' and isset($verkkokauppa_hinnatedifailistaverollisina) and !empty($verokanta)) {
+        $editilaus_hinta = round($editilaus_hinta / (1 + $verokanta/100), 2);
+      }
+    }
+
+    // Jos tilaus tulee ennalta määritellyistä kaupoista
+    // jotka on setattu $verkkokauppa_erikoiskasittely:n ja
+    // ei olla setattu $verkkokauppa_hinnatedifailista, nollataan hinta
+    if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
+      and count($verkkokauppa_erikoiskasittely) > 0) {
+
+      $result = hae_erikoiskaupan_parametrit($verkkokauppa);
+      if (count($result) > 0  and !isset($verkkokauppa_hinnatedifailista)) {
+        $editilaus_hinta = 0;
+      }
     }
 
     break;
-    
-    case 'OSTOTILRIV.OTR_VEROKANTA':
-      // magento-keisissä, tilausrivin veron määrä, vero tulee filessä ostohinnan jälkeen
-      $verokanta = (int) trim($tieto);
-      
-      if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $tieto != '') {
-        // Huomioidaan tässä vasta vero, kun me tiedetään rivin verokanta vasta nyt
-        
-        // Käytössä on verolliset myyntihinnat, mutta edifailissa hinnat ovat verottomia
-        if ($yhtiorow["alv_kasittely"] == '' and !isset($verkkokauppa_hinnatedifailistaverollisina)) {
-          $editilaus_hinta = round($editilaus_hinta * (1 + $laskurow["alv"]/100), 2);
-        }
-
-        // Käytössä on verottomat myyntihinnat, mutta edifailissa hinta kuitenkin sisältää verot ja halutaan laskea ne pois
-        if ($yhtiorow["alv_kasittely"] != '' and isset($verkkokauppa_hinnatedifailistaverollisina) and !empty($verokanta)) {
-          $editilaus_hinta = round($editilaus_hinta / (1 + $verokanta/100), 2);
-        }
-      }
-
-      // Jos tilaus tulee ennalta määritellyistä kaupoista
-      // jotka on setattu $verkkokauppa_erikoiskasittely:n ja
-      // ei olla setattu $verkkokauppa_hinnatedifailista, nollataan hinta
-      if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
-        and count($verkkokauppa_erikoiskasittely) > 0) {
-
-        $result = hae_erikoiskaupan_parametrit($verkkokauppa);
-        if (count($result) > 0  and !isset($verkkokauppa_hinnatedifailista)) {
-          $editilaus_hinta = 0;
-        }
-      }
-      break;
 
   case 'OSTOTILRIV.OTR_ALENNUS' :
     // Kun tullaan magentosta ja meillä on alennus, niin otetaan alennus talteen jos me luotetaan verkkokaupan hintoihin.
